@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bài trắc nghiệm Toán 8 - Chương III</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:"Times New Roman",serif;background:#eef3f8;color:#18212b}
+header{background:linear-gradient(135deg,#12355b,#176b87);color:#fff;padding:22px 28px;position:sticky;top:0;z-index:10;box-shadow:0 3px 12px #0003}
+h1{margin:0 0 6px;font-size:30px} .sub{font-size:18px}
+.container{max-width:1100px;margin:22px auto;padding:0 16px}
+.card{background:#fff;border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 4px 15px #00000012}
+.info{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px} input{width:100%;padding:12px;border:1px solid #bcc7d3;border-radius:9px;font:18px "Times New Roman"}
+.progress{height:10px;background:#dbe3eb;border-radius:10px;overflow:hidden;margin:10px 0 18px} .bar{height:100%;background:#16a085;width:0%;transition:.2s}
+.qhead{display:flex;justify-content:space-between;gap:10px;align-items:center} .badge{background:#e9f5ff;padding:6px 10px;border-radius:20px;font-size:15px; font-weight:bold; color: #12355b;}
+.qtext{font-size:22px;line-height:1.45;font-weight:bold;margin:14px 0}
+.option{display:block;padding:13px 15px;margin:10px 0;border:2px solid #d8e0e8;border-radius:11px;cursor:pointer;font-size:19px;transition:.15s}
+.option:hover{background:#f3f8fc;border-color:#5b9bd5} .option input{width:auto;margin-right:10px;transform:scale(1.2)}
+.correct{border-color:#2e9d59!important;background:#e8f7ed} .wrong{border-color:#d64545!important;background:#fdeaea}
+.actions{position:sticky;bottom:0;background:#ffffffee;backdrop-filter:blur(8px);padding:15px;border-top:1px solid #ddd;display:flex;gap:10px;justify-content:center}
+button{border:0;border-radius:10px;padding:13px 22px;font:bold 18px "Times New Roman";cursor:pointer}
+#submit{background:#176b87;color:#fff} #reset{background:#e6e9ed;color:#222}
+#result{display:none;text-align:center} .score{font-size:42px;font-weight:bold;color:#176b87}
+.review{text-align:left;margin-top:18px} .reviewItem{padding:14px;border-radius:10px;margin:10px 0;background:#f7f8fa; font-size:18px; line-height:1.5}
+.timer{font-size:22px;font-weight:bold;background:#fff;color:#b52b2b;padding:7px 12px;border-radius:10px;white-space:nowrap}
+@media(max-width:700px){.info{grid-template-columns:1fr}h1{font-size:24px}.qtext{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="qhead"><div><h1>BÀI TRẮC NGHIỆM TOÁN 8</h1><div class="sub">Chương III: Tứ giác – KNTT | 50 câu | 60 phút | Mã đề thi: T8-C3-50</div></div><div class="timer" id="timer">60:00</div></div>
+</header>
+<div class="container">
+ <section class="card">
+  <h2>👨‍🎓 Thông tin học sinh</h2>
+  <div class="info">
+   <input id="name" placeholder="Họ và tên">
+   <input id="className" placeholder="Lớp">
+   <input id="studentId" placeholder="SBD">
+  </div>
+  <div style="margin-top:14px">Tiến độ: <span id="progressText">0/50</span></div>
+  <div class="progress"><div class="bar" id="bar"></div></div>
+ </section>
+ <main id="quiz"></main>
+ <section class="card" id="result">
+  <h2>🎉 KẾT QUẢ BÀI LÀM</h2>
+  <div id="studentResult"></div>
+  <div class="score" id="score"></div>
+  <div id="summary"></div>
+  <div class="review" id="review"></div>
+ </section>
+</div>
+<div class="actions">
+ <button id="submit">📌 Nộp bài & chấm điểm</button>
+ <button id="reset">🔄 Làm lại bài (Xáo trộn đề mới)</button>
+</div>
+<script>
+const QUESTIONS = [
+{"id":1,"level":"Nhận biết","q":"Tổng số đo các góc của một tứ giác lồi ABCD bằng bao nhiêu?","options":["180°","360°","270°","540°"],"answer":1,"explanation":"Theo định lí tổng các góc trong một tứ giác, tổng số đo 4 góc của một tứ giác lồi luôn bằng 360° (∠A + ∠B + ∠C + ∠D = 360°)."},
+{"id":2,"level":"Nhận biết","q":"Tứ giác lồi là tứ giác luôn nằm về một phía của đường thẳng chứa:","options":["Bất kỳ cạnh nào của tứ giác","Đường chéo bất kỳ","Hai đỉnh kề nhau","Một đỉnh và một cạnh"],"answer":0,"explanation":"Định nghĩa tứ giác lồi: Tứ giác lồi là tứ giác luôn nằm trong một nửa mặt phẳng có bờ là đường thẳng chứa bất kỳ cạnh nào của tứ giác."},
+{"id":3,"level":"Nhận biết","q":"Hình thang là tứ giác có đặc điểm nào sau đây?","options":["Hai cạnh kề bằng nhau","Hai cạnh đối song song","Hai đường chéo bằng nhau","Bốn góc bằng nhau"],"answer":1,"explanation":"Định nghĩa hình thang: Hình thang là tứ giác có hai cạnh đối song song."},
+{"id":4,"level":"Nhận biết","q":"Hình thang cân là hình thang có tính chất đặc trưng nào về góc?","options":["Hai góc đối bằng nhau","Hai góc kề một đáy bằng nhau","Bốn góc bằng nhau","Hai góc kề một cạnh bên bằng nhau"],"answer":1,"explanation":"Định nghĩa hình thang cân: Hình thang cân là hình thang có hai góc kề một đáy bằng nhau."},
+{"id":5,"level":"Nhận biết","q":"Trong các khẳng định sau về hình thang cân ABCD (AB // CD), khẳng định nào SAI?","options":["Hai cạnh bên bằng nhau (AD = BC)","Hai đường chéo bằng nhau (AC = BD)","Hai góc kề đáy lớn bằng nhau (∠C = ∠D)","Hai đường chéo vuông góc với nhau"],"answer":3,"explanation":"Trong hình thang cân chung, hai đường chéo không nhất thiết phải vuông góc với nhau. Các tính chất A, B, C đều đúng theo định lí về hình thang cân."},
+{"id":6,"level":"Nhận biết","q":"Dấu hiệu nào sau đây KHÔNG DÙNG để nhận biết hình thang cân?","options":["Hình thang có hai góc kề một đáy bằng nhau","Hình thang có hai đường chéo bằng nhau","Hình thang có hai cạnh bên bằng nhau","Hình thang có hai góc đối bù nhau"],"answer":2,"explanation":"Hình thang có hai cạnh bên bằng nhau chưa chắc là hình thang cân (có thể là hình bình hành). Do đó nó không phải là dấu hiệu nhận biết."},
+{"id":7,"level":"Nhận biết","q":"Hình bình hành là tứ giác có:","options":["Các cạnh đối song song","Một cặp cạnh đối song song","Hai đường chéo vuông góc","Bốn cạnh bằng nhau"],"answer":0,"explanation":"Định nghĩa hình bình hành: Hình bình hành là tứ giác có các cạnh đối song song."},
+{"id":8,"level":"Nhận biết","q":"Tính chất nào sau đây KHÔNG PHẢI là tính chất của hình bình hành?","options":["Các cạnh đối bằng nhau","Các góc đối bằng nhau","Hai đường chéo cắt nhau tại trung điểm mỗi đường","Hai đường chéo bằng nhau"],"answer":3,"explanation":"Hình bình hành nói chung hai đường chéo không bằng nhau (chỉ bằng nhau khi là hình chữ nhật)."},
+{"id":9,"level":"Nhận biết","q":"Dấu hiệu nào sau đây nhận biết một tứ giác là hình bình hành?","options":["Tứ giác có hai cặp cạnh đối bằng nhau","Tứ giác có hai góc đối bù nhau","Tứ giác có hai đường chéo vuông góc","Tứ giác có một góc vuông"],"answer":0,"explanation":"Dấu hiệu nhận biết hình bình hành: Tứ giác có các cạnh đối bằng nhau (hai cặp cạnh đối bằng nhau) là hình bình hành."},
+{"id":10,"level":"Nhận biết","q":"Hình chữ nhật là tứ giác có:","options":["2 góc vuông","3 góc vuông","2 cạnh đối bằng nhau","2 đường chéo vuông góc"],"answer":1,"explanation":"Định nghĩa hình chữ nhật: Hình chữ nhật là tứ giác có 4 góc vuông (chỉ cần có 3 góc vuông thì góc còn lại tự động bằng 90°)."},
+{"id":11,"level":"Nhận biết","q":"Trong hình chữ nhật ABCD, hai đường chéo AC và BD có tính chất:","options":["Vuông góc với nhau","Bằng nhau và cắt nhau tại trung điểm mỗi đường","Là đường phân giác của các góc","Song song với nhau"],"answer":1,"explanation":"Trong hình chữ nhật, hai đường chéo bằng nhau và cắt nhau tại trung điểm của mỗi đường."},
+{"id":12,"level":"Nhận biết","q":"Dấu hiệu nào sau đây biến một hình bình hành thành hình chữ nhật?","options":["Có hai cạnh kề bằng nhau","Có hai đường chéo vuông góc","Có một góc vuông","Có một đường chéo là phân giác"],"answer":2,"explanation":"Dấu hiệu nhận biết: Hình bình hành có một góc vuông là hình chữ nhật."},
+{"id":13,"level":"Nhận biết","q":"Trong một tam giác vuông, độ dài đường trung tuyến ứng với cạnh huyền bằng:","options":["Bằng cạnh huyền","Bằng một nửa cạnh huyền","Bằng một nửa cạnh góc vuông","Bằng hai lần cạnh huyền"],"answer":1,"explanation":"Định lí tính chất tam giác vuông: Trong tam giác vuông, đường trung tuyến ứng với cạnh huyền bằng một nửa cạnh huyền."},
+{"id":14,"level":"Nhận biết","q":"Hình thoi là tứ giác có:","options":["Bốn góc bằng nhau","Bốn cạnh bằng nhau","Hai đường chéo bằng nhau","Hai cạnh kề vuông góc"],"answer":1,"explanation":"Định nghĩa hình thoi: Hình thoi là tứ giác có bốn cạnh bằng nhau."},
+{"id":15,"level":"Nhận biết","q":"Trong hình thoi, hai đường chéo có tính chất đặc trưng nào?","options":["Bằng nhau","Song song với nhau","Vuông góc với nhau và là các đường phân giác của các góc","Bằng một nửa cạnh hình thoi"],"answer":2,"explanation":"Tính chất hình thoi: Hai đường chéo vuông góc với nhau và là các đường phân giác của các góc trong hình thoi."},
+{"id":16,"level":"Nhận biết","q":"Dấu hiệu nào sau đây giúp nhận biết một hình bình hành là hình thoi?","options":["Có một góc vuông","Có hai đường chéo bằng nhau","Có hai đường chéo vuông góc với nhau","Có các góc đối bằng nhau"],"answer":2,"explanation":"Dấu hiệu nhận biết: Hình bình hành có hai đường chéo vuông góc với nhau là hình thoi."},
+{"id":17,"level":"Nhận biết","q":"Hình vuông là tứ giác vừa có tính chất của:","options":["Hình thang và hình bình hành","Hình chữ nhật và hình thoi","Hình thang cân và hình thoi","Tứ giác lồi và hình thang"],"answer":1,"explanation":"Định nghĩa hình vuông: Hình vuông là tứ giác vừa là hình chữ nhật (có 4 góc vuông) vừa là hình thoi (có 4 cạnh bằng nhau)."},
+{"id":18,"level":"Nhận biết","q":"Khẳng định nào sau đây SAI khi nói về hình vuông ABCD?","options":["Hai đường chéo AC và BD bằng nhau","Hai đường chéo AC ⊥ BD","Hai đường chéo không cắt nhau tại trung điểm","AC là đường phân giác của góc A"],"answer":2,"explanation":"Hình vuông là hình bình hành nên hai đường chéo BẮT BUỘC phải cắt nhau tại trung điểm mỗi đường. Khẳng định C là SAI."},
+{"id":19,"level":"Nhận biết","q":"Tứ giác ABCD có AB // CD và AD // BC. Tứ giác ABCD là hình gì?","options":["Hình thang cân","Hình bình hành","Hình chữ nhật","Hình thoi"],"answer":1,"explanation":"Tứ giác có các cạnh đối song song (AB // CD và AD // BC) là hình bình hành theo định nghĩa."},
+{"id":20,"level":"Nhận biết","q":"Tứ giác có hai đường chéo cắt nhau tại trung điểm mỗi đường và bằng nhau là hình gì?","options":["Hình thoi","Hình bình hành","Hình chữ nhật","Hình thang cân"],"answer":2,"explanation":"Tứ giác có hai đường chéo cắt nhau tại trung điểm mỗi đường là hình bình hành. Hình bình hành có 2 đường chéo bằng nhau là hình chữ nhật."},
+{"id":21,"level":"Thông hiểu","q":"Cho tứ giác ABCD có ∠A = 100°, ∠B = 120°, ∠C = 70°. Số đo góc D bằng bao nhiêu?","options":["60°","70°","80°","90°"],"answer":1,"explanation":"Tổng các góc của tứ giác ABCD bằng 360°. Do đó: ∠D = 360° - (100° + 120° + 70°) = 70°."},
+{"id":22,"level":"Thông hiểu","q":"Cho hình thang cân ABCD (AB // CD) có ∠A = 110°. Số đo góc C của hình thang bằng bao nhiêu?","options":["110°","70°","80°","60°"],"answer":1,"explanation":"Hình thang ABCD có AB // CD => ∠A + ∠D = 180° => ∠D = 70°. Do ABCD là hình thang cân nên ∠C = ∠D = 70°."},
+{"id":23,"level":"Thông hiểu","q":"Cho hình bình hành ABCD có ∠A = 70°. Số đo góc B bằng bao nhiêu?","options":["70°","110°","120°","140°"],"answer":1,"explanation":"Trong hình bình hành ABCD (AD // BC), hai góc kề một cạnh bù nhau: ∠A + ∠B = 180° => ∠B = 180° - 70° = 110°."},
+{"id":24,"level":"Thông hiểu","q":"Cho hình thoi ABCD có độ dài hai đường chéo AC = 6 cm và BD = 8 cm. Độ dài cạnh của hình thoi bằng:","options":["5 cm","7 cm","10 cm","14 cm"],"answer":0,"explanation":"Hai đường chéo hình thoi vuông góc tại O và trung điểm mỗi đường. OA = 3 cm, OB = 4 cm. Theo định lí Pythagore: AB = √(3² + 4²) = √25 = 5 cm."},
+{"id":25,"level":"Thông hiểu","q":"Cho hình chữ nhật ABCD có AB = 8 cm, BC = 6 cm. Độ dài đường chéo AC bằng:","options":["10 cm","14 cm","28 cm","48 cm"],"answer":0,"explanation":"Trong △ABC vuông tại B: AC² = AB² + BC² = 8² + 6² = 100 => AC = 10 cm."},
+{"id":26,"level":"Thông hiểu","q":"Một hình vuông ABCD có chu vi bằng 24 cm. Độ dài đường chéo AC bằng bao nhiêu?","options":["6 cm","6√2 cm","12 cm","36 cm"],"answer":1,"explanation":"Cạnh hình vuông a = 24 / 4 = 6 cm. Độ dài đường chéo AC = a√2 = 6√2 cm."},
+{"id":27,"level":"Thông hiểu","q":"Cho tam giác ABC vuông tại A có AB = 9 cm, AC = 12 cm. Độ dài đường trung tuyến AM ứng với cạnh huyền BC bằng:","options":["15 cm","7,5 cm","10,5 cm","6 cm"],"answer":1,"explanation":"Cạnh huyền BC = √(9² + 12²) = √225 = 15 cm. Đường trung tuyến AM = BC / 2 = 7,5 cm."},
+{"id":28,"level":"Thông hiểu","q":"Cho hình thang ABCD (AB // CD) có ∠A - ∠D = 40°. Tính số đo góc A và góc D?","options":["∠A = 110°, ∠D = 70°","∠A = 100°, ∠D = 60°","∠A = 120°, ∠D = 80°","∠A = 130°, ∠D = 90°"],"answer":0,"explanation":"Vì AB // CD nên ∠A + ∠D = 180°. Kết hợp ∠A - ∠D = 40° => ∠A = (180°+40°)/2 = 110°; ∠D = 70°."},
+{"id":29,"level":"Thông hiểu","q":"Cho hình bình hành ABCD có hai đường chéo AC và BD cắt nhau tại O. Biết AC = 12 cm, BD = 16 cm. Tổng OA + OB bằng:","options":["14 cm","28 cm","20 cm","10 cm"],"answer":0,"explanation":"Do O là trung điểm của AC và BD nên OA = 12/2 = 6 cm và OB = 16/2 = 8 cm. Tổng OA + OB = 14 cm."},
+{"id":30,"level":"Thông hiểu","q":"Cho hình thoi ABCD có góc A = 60° và độ dài cạnh AB = 5 cm. Độ dài đường chéo BD bằng bao nhiêu?","options":["5 cm","5√3 cm","10 cm","2,5 cm"],"answer":0,"explanation":"Xét tam giác ABD có AB = AD và ∠A = 60° nên △ABD là tam giác đều. Suy ra BD = AB = 5 cm."},
+{"id":31,"level":"Thông hiểu","q":"Cho tứ giác ABCD có AB = AD và CB = CD. Biết ∠B = 100°, ∠D = 100°, ∠A = 70°. Tính số đo góc C?","options":["90°","80°","100°","110°"],"answer":0,"explanation":"Tổng 4 góc của tứ giác bằng 360°. => ∠C = 360° - (70° + 100° + 100°) = 90°."},
+{"id":32,"level":"Thông hiểu","q":"Cho tam giác ABC cân tại A. Trên các cạnh AB, AC lấy lần lượt hai điểm D, E sao cho AD = AE. Tứ giác BDEC là hình gì?","options":["Hình bình hành","Hình thang cân","Hình chữ nhật","Hình thoi"],"answer":1,"explanation":"△ADE cân tại A, △ABC cân tại A => ∠ADE = ∠ABC => DE // BC (BDEC là hình thang). Lại có ∠B = ∠C => BDEC là hình thang cân."},
+{"id":33,"level":"Thông hiểu","q":"Một hình chữ nhật có chu vi bằng 28 cm, chiều dài hơn chiều rộng 2 cm. Diện tích của hình chữ nhật đó là:","options":["48 cm²","40 cm²","96 cm²","60 cm²"],"answer":0,"explanation":"Nửa chu vi = 14 cm. Chiều dài = (14+2)/2 = 8 cm. Chiều rộng = 6 cm. Diện tích S = 8 × 6 = 48 cm²."},
+{"id":34,"level":"Thông hiểu","q":"Cho hình vuông ABCD có độ dài đường chéo bằng 10 cm. Diện tích của hình vuông ABCD bằng:","options":["50 cm²","100 cm²","25 cm²","50√2 cm²"],"answer":0,"explanation":"Công thức diện tích hình vuông theo đường chéo d: S = d² / 2 = 10² / 2 = 50 cm²."},
+{"id":35,"level":"Thông hiểu","q":"Cho hình bình hành ABCD có AB = 2 AD. Gọi M là trung điểm của AB. Tam giác CMD là tam giác gì?","options":["Tam giác cân","Tam giác đều","Tam giác vuông tại M","Tam giác vuông cân"],"answer":2,"explanation":"AM = MB = AD = BC => △ADM cân tại A, △BCM cân tại B. Biến đổi góc ta được ∠AMD + ∠BMC = 90° => ∠CMD = 90° (vuông tại M)."},
+{"id":36,"level":"Vận dụng","q":"Cho hình thang cân ABCD (AB // CD, AB < CD) có AH ⊥ CD tại H, BK ⊥ CD tại K. Biết AB = 6 cm, CD = 14 cm, AD = 5 cm. Độ dài đường cao AH bằng:","options":["3 cm","4 cm","2,5 cm","3,5 cm"],"answer":0,"explanation":"DH = (CD - AB)/2 = (14 - 6)/2 = 4 cm. Xét △ADH vuông, AH = √(AD² - DH²) = √(5² - 4²) = 3 cm."},
+{"id":37,"level":"Vận dụng","q":"Một mảnh đất hình chữ nhật ABCD kích thước 20 m × 15 m. Người ta quy hoạch một con đường đi dạng hình thoi MNPQ nối trung điểm 4 cạnh mảnh đất. Diện tích phần đất còn lại ngoài con đường là:","options":["150 m²","200 m²","225 m²","100 m²"],"answer":0,"explanation":"S_đất = 300 m². Hình thoi MNPQ có 2 đường chéo 20 m và 15 m => S_đường = (20×15)/2 = 150 m². Diện tích còn lại = 150 m²."},
+{"id":38,"level":"Vận dụng","q":"Cho tam giác ABC vuông tại A, đường cao AH. Gọi D, E lần lượt là chân đường vuông góc kẻ từ H xuống AB và AC. So sánh độ dài AH và DE:","options":["AH = DE","AH > DE","AH < DE","AH = 2 DE"],"answer":0,"explanation":"Tứ giác ADHE có 3 góc vuông nên là hình chữ nhật. Trong hình chữ nhật, hai đường chéo bằng nhau nên AH = DE."},
+{"id":39,"level":"Vận dụng","q":"Cho hình bình hành ABCD. Kẻ AE ⊥ BC (E ∈ BC) và AF ⊥ CD (F ∈ CD). Biết góc ∠EAF = 50°. Tính số đo góc C của hình bình hành ABCD?","options":["130°","50°","100°","140°"],"answer":0,"explanation":"Tứ giác AECF có ∠AEC = 90°, ∠AFC = 90°. Tổng 4 góc = 360° => ∠C = 360° - (90°+90°+50°) = 130°."},
+{"id":40,"level":"Vận dụng","q":"Cho tam giác ABC nhọn, các đường cao BD và CE cắt nhau tại H. Gọi M, N, P, Q lần lượt là trung điểm của HB, HC, AC, AB. Tứ giác MNPQ là hình gì?","options":["Hình chữ nhật","Hình thoi","Hình thang cân","Hình vuông"],"answer":0,"explanation":"Dùng đường trung bình suy ra MNPQ là hình bình hành (MN//BC, PQ//BC). Lại có MQ//AH, AH ⊥ BC => MQ ⊥ MN => MNPQ là hình chữ nhật."},
+{"id":41,"level":"Vận dụng","q":"Một căn nhà có mái dạng hình thang cân ABCD với đáy nhỏ AB = 4 m, đáy lớn CD = 8 m, chiều cao AH = 3 m. Tính chiều dài độ nghiêng mái nhà AD?","options":["√13 m (≈ 3,61 m)","5 m","4 m","√15 m"],"answer":0,"explanation":"Đoạn DH = (CD - AB)/2 = (8 - 4)/2 = 2 m. Theo Pythagore: AD = √(AH² + DH²) = √(3² + 2²) = √13 m."},
+{"id":42,"level":"Vận dụng","q":"Cho hình thoi ABCD có ∠A = 60°. Gọi E, F, G, H lần lượt là trung điểm của AB, BC, CD, DA. Tứ giác EFGH là hình gì?","options":["Hình chữ nhật","Hình thoi","Hình vuông","Hình bình hành thường"],"answer":0,"explanation":"Tứ giác có 4 đỉnh là trung điểm 4 cạnh của một hình thoi luôn là hình chữ nhật (do các cạnh song song với 2 đường chéo vuông góc của hình thoi)."},
+{"id":43,"level":"Vận dụng","q":"Cho hình vuông ABCD cạnh 8 cm. Lấy điểm E trên cạnh BC sao cho BE = 2 cm. Đường thẳng qua A vuông góc với AE cắt đường thẳng CD tại F. Độ dài đoạn thẳng AF bằng:","options":["2√17 cm","10 cm","8√2 cm","12 cm"],"answer":0,"explanation":"Chứng minh △ABE = △ADF => AE = AF. Trong △ABE vuông: AE = √(8² + 2²) = √68 = 2√17 cm."},
+{"id":44,"level":"Vận dụng","q":"Cho hình thang cân ABCD có hai đường chéo AC ⊥ BD. Biết đường cao AH = 8 cm. Diện tích của hình thang cân ABCD bằng:","options":["64 cm²","32 cm²","128 cm²","96 cm²"],"answer":0,"explanation":"Trong hình thang cân có hai đường chéo vuông góc, đường cao AH bằng đường trung bình. Diện tích S = m × h = h² = 8² = 64 cm²."},
+{"id":45,"level":"Vận dụng","q":"Cho hình chữ nhật ABCD có AB = 2 BC. Gọi E, F lần lượt là trung điểm của AB và CD. Tứ giác AEFD là hình gì?","options":["Hình vuông","Hình chữ nhật","Hình thoi","Hình bình hành"],"answer":0,"explanation":"AE = AB/2 = BC = AD. AEFD là hình bình hành có ∠D = 90° và hai cạnh kề AD = AE nên là hình vuông."},
+{"id":46,"level":"Vận dụng cao","q":"Cho hình vuông ABCD cạnh a. Người ta cắt 4 góc hình vuông các tam giác vuông cân bằng nhau để thu được một hình bát giác đều. Độ dài cạnh bát giác đều theo a là:","options":["a(√2 - 1)","a(2 - √2)","a / (√2 + 1)","a / 3"],"answer":0,"explanation":"Gọi cạnh bát giác là x. Đoạn cắt ở góc là x/√2. Ta có x + 2(x/√2) = a => x(1 + √2) = a => x = a(√2 - 1)."},
+{"id":47,"level":"Vận dụng cao","q":"Cho tứ giác ABCD có diện tích S = 32 cm² và tổng độ dài hai đường chéo AC + BD = 16 cm. Số đo góc giữa hai đường chéo AC và BD là:","options":["90°","60°","45°","30°"],"answer":0,"explanation":"S = (1/2)AC·BD·sinα. Mà AC·BD ≤ ((AC+BD)/2)² = 64 => S ≤ 32·sinα. Vì S = 32 nên sinα = 1 => α = 90°."},
+{"id":48,"level":"Vận dụng cao","q":"Cho tam giác ABC đều cạnh a. Lấy điểm M bất kỳ nằm trong tam giác. Gọi D, E, F lần lượt là hình chiếu vuông góc của M lên BC, CA, AB. Tổng MD + ME + MF bằng:","options":["a√3 / 2","a√3","3a / 2","a√2 / 2"],"answer":0,"explanation":"Dùng diện tích: S(ABC) = S(MAB) + S(MBC) + S(MCA) => h = MD + ME + MF. Chiều cao tam giác đều h = a√3 / 2."},
+{"id":49,"level":"Vận dụng cao","q":"Cho hình chữ nhật ABCD và điểm M nằm bất kỳ bên trong hình chữ nhật. Biết MA = 3 cm, MB = 4 cm, MC = 5 cm. Độ dài đoạn thẳng MD bằng:","options":["3√2 cm (≈ 4,24 cm)","√18 cm","4,5 cm","5 cm"],"answer":0,"explanation":"Áp dụng định lí điểm trong hình chữ nhật: MA² + MC² = MB² + MD² => 3² + 5² = 4² + MD² => MD² = 18 => MD = 3√2 cm."},
+{"id":50,"level":"Vận dụng cao","q":"Một công viên hình tứ giác ABCD có hai đường chéo AC ⊥ BD tại O. Người ta dựng 4 cột đèn tại trung điểm M, N, P, Q của 4 cạnh AB, BC, CD, DA và chăng dây nối M-N-P-Q-M. Tổng độ dài dây chăng là bao nhiêu biết AC = 40 m và BD = 30 m?","options":["70 m","100 m","140 m","50 m"],"answer":0,"explanation":"MNPQ là hình chữ nhật (vì AC ⊥ BD) với chiều dài 20m và chiều rộng 15m. Chu vi chăng dây = 2×(20+15) = 70 m."}
+];
+
+let submitted=false, remaining=3600, timerHandle;
+
+// Thuật toán xáo trộn Fisher-Yates
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function randomizeQuiz() {
+  shuffleArray(QUESTIONS);
+  QUESTIONS.forEach((q, index) => {
+    q.id = index + 1; // Đánh lại số thứ tự
+    let correctAnswerContent = q.options[q.answer];
+    shuffleArray(q.options); // Đảo đáp án A B C D
+    q.answer = q.options.indexOf(correctAnswerContent); // Cập nhật lại vị trí đáp án đúng
+  });
+}
+
+function renderQuiz(){
+ const quiz=document.getElementById('quiz');
+ quiz.innerHTML=QUESTIONS.map(x=>`
+  <section class="card question" data-id="${x.id}">
+   <div class="qhead"><span><b>Câu ${x.id}</b></span><span class="badge">${x.level}</span></div>
+   <div class="qtext">${x.q}</div>
+   <div>${x.options.map((o,j)=>`<label class="option" data-choice="${j}"><input type="radio" name="q${x.id}" value="${j}"> ${String.fromCharCode(65+j)}.${o}</label>`).join('')}</div>
+  </section>`).join('');
+ document.querySelectorAll('input[type=radio]').forEach(el=>el.addEventListener('change',updateProgress));
+}
+
+function updateProgress(){
+ const answered=new Set([...document.querySelectorAll('input[type=radio]:checked')].map(x=>x.name));
+ document.getElementById('progressText').textContent=answered.size+'/50';
+ document.getElementById('bar').style.width=(answered.size/50*100)+'%';
+}
+
+function startTimer(){
+ timerHandle=setInterval(()=>{
+  if(submitted)return;
+  remaining--;
+  const m=Math.floor(remaining/60), s=remaining%60;
+  document.getElementById('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(remaining<=0){clearInterval(timerHandle); submitQuiz(true);}
+ },1000);
+}
+
+function submitQuiz(auto=false){
+ if(submitted)return;
+ const name=document.getElementById('name').value.trim();
+ if(!auto && !name){alert('Vui lòng nhập Họ và tên trước khi nộp bài.');document.getElementById('name').focus();return;}
+ if(!auto && !confirm('Bạn chắc chắn muốn nộp bài?'))return;
+ submitted=true; clearInterval(timerHandle);
+ let correct=0, answered=0;
+ const review=[];
+ QUESTIONS.forEach(x=>{
+   const chosen=document.querySelector(`input[name="q${x.id}"]:checked`);
+   const c=chosen?Number(chosen.value):null;
+   if(c!==null)answered++;
+   if(c===x.answer)correct++;
+   const labels=document.querySelectorAll(`.question[data-id="${x.id}"] .option`);
+   labels.forEach((lab,j)=>{if(j===x.answer)lab.classList.add('correct'); if(c===j && c!==x.answer)lab.classList.add('wrong');});
+   review.push(`<div class="reviewItem"><b>Câu ${x.id}:</b> ${c===null?'Chưa trả lời':('Chọn '+String.fromCharCode(65+c))} — <b>Đáp án đúng: ${String.fromCharCode(65+x.answer)}</b><br><span style="color:#176b87"><i>💡 Hướng dẫn giải:</i></span> ${x.explanation}</div>`);
+ });
+ const score=(correct/50*10);
+ document.getElementById('studentResult').innerHTML=`<b>${escapeHtml(name||'Học sinh')}</b> | Lớp: ${escapeHtml(document.getElementById('className').value||'—')} | SBD: ${escapeHtml(document.getElementById('studentId').value||'—')}`;
+ document.getElementById('score').textContent=score.toFixed(1).replace('.',',')+'/10';
+ document.getElementById('summary').innerHTML=`Đúng <b>${correct}/50</b> câu · Sai/không trả lời <b>${50-correct}</b> câu · Đã trả lời <b>${answered}</b> câu.`;
+ document.getElementById('review').innerHTML=review.join('');
+ document.getElementById('result').style.display='block';
+ document.getElementById('result').scrollIntoView({behavior:'smooth'});
+ document.querySelectorAll('input,button').forEach(el=>{if(el.id!=='reset')el.disabled=true;});
+}
+
+function escapeHtml(s){return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+document.getElementById('submit').addEventListener('click',()=>submitQuiz(false));
+document.getElementById('reset').addEventListener('click',()=>location.reload());
+
+// Kích hoạt xáo trộn, vẽ giao diện và chạy đồng hồ
+randomizeQuiz();
+renderQuiz(); 
+startTimer();
+</script>
+</body></html>
