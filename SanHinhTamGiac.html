@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Săn Tam Giác Kỳ Thú - Triangle Quest</title>
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-dark: #0369a1;
+      --accent: #f59e0b;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-sub: #475569;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .game-header {
+      background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+      color: white;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .title-area h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-area p {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 3px;
+    }
+
+    .sound-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .sound-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Quest Steps Navigator */
+    .quest-nav {
+      background: #f1f5f9;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .quest-step {
+      flex: 1;
+      min-width: 125px;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      transition: all 0.25s ease;
+    }
+
+    .quest-step.active {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #eff6ff;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(2, 132, 199, 0.12);
+    }
+
+    .quest-step.done {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-light);
+    }
+
+    .step-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--border);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .quest-step.active .step-icon {
+      background: var(--primary);
+    }
+
+    .quest-step.done .step-icon {
+      background: var(--success);
+    }
+
+    /* Task Instruction bar */
+    .status-panel {
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .instruction-text {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .instruction-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 700;
+    }
+
+    .action-tools {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: var(--text-sub);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+
+    .tool-btn:hover {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    .tool-btn.active {
+      background: #0284c7;
+      border-color: #0284c7;
+      color: white;
+    }
+
+    /* Canvas Viewport */
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      background: #fafafa;
+      touch-action: none;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    /* Realtime Measurements HUD */
+    .hud-box {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(4px);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      pointer-events: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .hud-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hud-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hud-item {
+      color: var(--text-sub);
+    }
+
+    .hud-item.match {
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    /* Knowledge Card Popup (Hiện ra khi săn trúng hình) */
+    .knowledge-card {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      left: 12px;
+      max-width: 420px;
+      margin-left: auto;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 10px;
+      border: 2px solid var(--success);
+      box-shadow: 0 10px 20px -5px rgba(22, 163, 74, 0.2);
+      padding: 12px 14px;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .knowledge-card.active {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--success);
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 6px;
+      margin-bottom: 6px;
+    }
+
+    .card-props {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-props li::before {
+      content: "✔ ";
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    /* Victory Modal */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 16px;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.show .modal-card {
+      transform: scale(1);
+    }
+
+    .victory-badge {
+      width: 60px;
+      height: 60px;
+      background: #fef08a;
+      border: 3px solid #eab308;
+      color: #854d0e;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin: 0 auto 12px;
+    }
+
+    .certificate-box {
+      margin: 16px 0;
+      background: #f8fafc;
+      border: 2px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .cert-code {
+      font-size: 1.7rem;
+      font-weight: 800;
+      font-family: monospace;
+      color: #0284c7;
+      letter-spacing: 3px;
+      margin: 4px 0;
+    }
+
+    .modal-btn {
+      width: 100%;
+      background: #16a34a;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    <header class="game-header">
+      <div class="title-area">
+        <h1><span>📐</span> Săn Tam Giác Kỳ Thú</h1>
+        <p>Kéo 3 đỉnh A, B, C từ tam giác nhọn ban đầu để biến hình qua 5 ải</p>
+      </div>
+      <button class="sound-btn" onclick="toggleAudio()">
+        <span id="sound-icon">🔊</span> <span id="sound-text">Âm thanh: BẬT</span>
+      </button>
+    </header>
+
+    <nav class="quest-nav" id="quest-nav">
+      <div class="quest-step active" id="step-0">
+        <div class="step-icon">1</div>
+        <div>Tam giác Vuông</div>
+      </div>
+      <div class="quest-step" id="step-1">
+        <div class="step-icon">2</div>
+        <div>Tam giác Tù</div>
+      </div>
+      <div class="quest-step" id="step-2">
+        <div class="step-icon">3</div>
+        <div>Tam giác Cân</div>
+      </div>
+      <div class="quest-step" id="step-3">
+        <div class="step-icon">4</div>
+        <div>Tam giác Vuông Cân</div>
+      </div>
+      <div class="quest-step" id="step-4">
+        <div class="step-icon">5</div>
+        <div>Tam giác Đều</div>
+      </div>
+    </nav>
+
+    <div class="status-panel">
+      <div class="instruction-text" id="instruction-text">
+        <span class="instruction-badge">Ải 1/5</span>
+        <span>Kéo đỉnh A sao cho <strong>góc A vuông (đạt đúng 90°)</strong>!</span>
+      </div>
+      <div class="action-tools">
+        <button class="tool-btn active" id="btn-grid" onclick="toggleGrid()">
+          <span>📐</span> Lưới ô vuông
+        </button>
+        <button class="tool-btn" onclick="resetCurrentQuest()">
+          <span>🔄</span> Đặt lại hình
+        </button>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper" id="canvas-container">
+      <canvas id="game-canvas"></canvas>
+      <canvas id="confetti-canvas"></canvas>
+
+      <!-- Bảng đo góc & cạnh thời gian thực -->
+      <div class="hud-box">
+        <div class="hud-row">
+          <div class="hud-col">
+            <div class="hud-item" id="hud-angle-A">Góc A: --°</div>
+            <div class="hud-item" id="hud-angle-B">Góc B: --°</div>
+            <div class="hud-item" id="hud-angle-C">Góc C: --°</div>
+          </div>
+          <div class="hud-col" style="border-left: 1px solid var(--border); padding-left: 12px;">
+            <div class="hud-item" id="hud-side-AB">AB: -- cm</div>
+            <div class="hud-item" id="hud-side-AC">AC: -- cm</div>
+            <div class="hud-item" id="hud-side-BC">BC: -- cm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thẻ bài kiến thức xuất hiện khi săn trúng hình -->
+      <div class="knowledge-card" id="knowledge-card">
+        <div class="card-head" id="card-title">🎉 ĐÃ PHÁT HIỆN: TAM GIÁC VUÔNG</div>
+        <ul class="card-props" id="card-props">
+          <li>Có một góc bằng 90° (cạnh đối diện gọi là Cạnh Huyền).</li>
+          <li>Hai góc nhọn còn lại phụ nhau: Góc B + Góc C = 90°.</li>
+          <li>Định lý Pythagore: BC² = AB² + AC².</li>
+        </ul>
+      </div>
+
+      <!-- Popup Chiến Thắng -->
+      <div class="modal-overlay" id="victory-modal">
+        <div class="modal-card">
+          <div class="victory-badge">🏆</div>
+          <h2>BẬC THẦY TAM GIÁC!</h2>
+          <p>Em đã hoàn thành trọn vẹn cả 5 thử thách phân loại và nắm vững tính chất các tam giác cơ bản!</p>
+
+          <div class="certificate-box">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 700;">MÃ XÁC THỰC HOÀN THÀNH</div>
+            <div class="cert-code" id="cert-code">951824</div>
+            <div style="font-size: 0.75rem; color: #94a3b8;" id="cert-time">Xác nhận lúc: --/--/----</div>
+          </div>
+
+          <p style="font-size: 0.8rem; margin-bottom: 12px; color: #16a34a;">
+            ✓ Đã tự động gửi điểm số 10/10 lên sổ điểm LMS.
+          </p>
+
+          <button class="modal-btn" onclick="restartEntireGame()">Chơi Lại Từ Đầu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ==========================================================================
+   1. HỆ THỐNG KẾT NỐI CHUẨN SCORM 1.2 CHO VNEDU LMS
+   ========================================================================== */
+let scormAPI = null;
+let isScormConnected = false;
+
+function findAPI(win) {
+  let attempts = 0;
+  try {
+    while (win && attempts < 8) {
+      try {
+        if (win.API) return win.API;
+      } catch (e) { break; }
+      try {
+        if (!win.parent || win.parent === win) break;
+        win = win.parent;
+      } catch (e) { break; }
+      attempts++;
+    }
+  } catch (err) {}
+  return null;
+}
+
+function initSCORM() {
+  try {
+    scormAPI = findAPI(window);
+    if (!scormAPI && window.opener) {
+      try { scormAPI = findAPI(window.opener); } catch (e) {}
+    }
+    if (scormAPI) {
+      const success = scormAPI.LMSInitialize("");
+      if (success === "true" || success === true) {
+        isScormConnected = true;
+        const status = scormAPI.LMSGetValue("cmi.core.lesson_status");
+        if (status === "not attempted" || status === "") {
+          scormAPI.LMSSetValue("cmi.core.lesson_status", "incomplete");
+          scormAPI.LMSCommit("");
+        }
+      }
+    }
+  } catch (e) {
+    scormAPI = null;
+    isScormConnected = false;
+  }
+}
+
+function submitScoreSCORM(score) {
+  try {
+    if (scormAPI && isScormConnected) {
+      scormAPI.LMSSetValue("cmi.core.score.min", "0");
+      scormAPI.LMSSetValue("cmi.core.score.max", "10");
+      scormAPI.LMSSetValue("cmi.core.score.raw", score.toString());
+      scormAPI.LMSSetValue("cmi.core.lesson_status", "passed");
+      scormAPI.LMSCommit("");
+    }
+  } catch (e) {}
+}
+
+window.addEventListener("load", initSCORM);
+window.addEventListener("beforeunload", () => {
+  try {
+    if (scormAPI && isScormConnected) scormAPI.LMSFinish("");
+  } catch (e) {}
+});
+
+/* ==========================================================================
+   2. HỆ THỐNG ÂM THANH NGUYÊN BẢN (WEB AUDIO API)
+   ========================================================================== */
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function playTone(freq, type, duration, delay = 0) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration);
+  } catch (e) {}
+}
+
+function soundSuccess() {
+  playTone(523.25, 'sine', 0.15, 0.0);
+  playTone(659.25, 'sine', 0.25, 0.12);
+}
+
+function soundVictory() {
+  playTone(523.25, 'triangle', 0.2, 0.0);
+  playTone(659.25, 'triangle', 0.2, 0.12);
+  playTone(783.99, 'triangle', 0.2, 0.24);
+  playTone(1046.50, 'triangle', 0.45, 0.36);
+}
+
+function toggleAudio() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('sound-icon').innerText = soundEnabled ? '🔊' : '🔇';
+  document.getElementById('sound-text').innerText = soundEnabled ? 'Âm thanh: BẬT' : 'Âm thanh: TẮT';
+}
+
+/* ==========================================================================
+   3. CƠ CHẾ ĐỒ HỌA & HÌNH HỌC TAM GIÁC
+   ========================================================================== */
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const container = document.getElementById('canvas-container');
+
+// Tọa độ 3 đỉnh: ban đầu là một tam giác nhọn thường
+let points = {
+  A: { x: 300, y: 110, label: 'A' },
+  B: { x: 160, y: 320, label: 'B' },
+  C: { x: 440, y: 320, label: 'C' }
+};
+
+let currentQuest = 0;
+let showGrid = true;
+let activePoint = null;
+let questCleared = false;
+let questHoldTimer = 0;
+
+// Bộ dữ liệu 5 ải thử thách & kiến thức tương ứng
+const QUESTS = [
+  {
+    name: "Tam giác Vuông",
+    badge: "Ải 1/5",
+    desc: "Kéo đỉnh A sao cho <strong>góc A vuông (đạt đúng 90°)</strong>!",
+    knowledge: {
+      title: "🎉 ĐÃ PHÁT HIỆN: TAM GIÁC VUÔNG",
+      props: [
+        "Có một góc bằng 90° (cạnh đối diện là Cạnh Huyền).",
+        "Hai góc nhọn phụ nhau: Góc B + Góc C = 90°.",
+        "Định lý Pythagore: BC² = AB² + AC²."
+      ]
+    }
+  },
+  {
+    name: "Tam giác Tù",
+    badge: "Ải 2/5",
+    desc: "Kéo hạ thấp hoặc sang ngang để <strong>góc A tù (lớn hơn 90°)</strong>!",
+    knowledge: {
+      title: "🎉 ĐÃ PHÁT HIỆN: TAM GIÁC TÙ",
+      props: [
+        "Có một góc lớn hơn 90° (góc tù).",
+        "Hai góc còn lại bắt buộc phải là góc nhọn (< 90°).",
+        "Cạnh đối diện góc tù luôn là cạnh có độ dài lớn nhất."
+      ]
+    }
+  },
+  {
+    name: "Tam giác Cân",
+    badge: "Ải 3/5",
+    desc: "Kéo đỉnh A vào chính giữa để <strong>hai cạnh AB và AC bằng nhau</strong>!",
+    knowledge: {
+      title: "🎉 ĐÃ PHÁT HIỆN: TAM GIÁC CÂN TẠI A",
+      props: [
+        "Hai cạnh bên bằng nhau: AB = AC.",
+        "Hai góc ở đáy bằng nhau: Góc B = Góc C.",
+        "Đường cao xuất phát từ A đồng thời là đường trung tuyến và phân giác."
+      ]
+    }
+  },
+  {
+    name: "Tam giác Vuông Cân",
+    badge: "Ải 4/5",
+    desc: "Kéo sao cho <strong>vừa vuông tại A (90°), vừa có AB = AC</strong>!",
+    knowledge: {
+      title: "🎉 ĐÃ PHÁT HIỆN: TAM GIÁC VUÔNG CÂN",
+      props: [
+        "Vuông tại A (90°) và cân tại A (AB = AC).",
+        "Hai góc nhọn ở đáy bằng nhau và bằng đúng 45°.",
+        "Hệ thức cạnh huyền: BC = AB × √2."
+      ]
+    }
+  },
+  {
+    name: "Tam giác Đều",
+    badge: "Ải 5/5",
+    desc: "Kéo đỉnh A sao cho <strong>cả 3 cạnh bằng nhau (AB = AC = BC)</strong>!",
+    knowledge: {
+      title: "🎉 ĐÃ PHÁT HIỆN: TAM GIÁC ĐỀU (HOÀN HẢO)",
+      props: [
+        "Ba cạnh bằng nhau: AB = AC = BC.",
+        "Ba góc bằng nhau và cùng bằng đúng 60°.",
+        "Mọi đường cao, trung tuyến, phân giác, trung trực đều trùng nhau."
+      ]
+    }
+  }
+];
+
+function dist(p1, p2) {
+  return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+}
+
+function vector(p1, p2) {
+  return { x: p2.x - p1.x, y: p2.y - p1.y };
+}
+
+function dot(v1, v2) {
+  return v1.x * v2.x + v1.y * v2.y;
+}
+
+// Tính góc tại đỉnh p2
+function getAngleDeg(p1, p2, p3) {
+  const v1 = vector(p2, p1);
+  const v2 = vector(p2, p3);
+  const l1 = Math.hypot(v1.x, v1.y);
+  const l2 = Math.hypot(v2.x, v2.y);
+  if (l1 < 5 || l2 < 5) return 0;
+  const cos = Math.max(-1, Math.min(1, dot(v1, v2) / (l1 * l2)));
+  return (Math.acos(cos) * 180) / Math.PI;
+}
+
+function resizeCanvas() {
+  const rect = container.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.scale(dpr, dpr);
+}
+
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  resizeConfetti();
+});
+
+/* ==========================================================================
+   4. THUẬT TOÁN NHẬN DIỆN TAM GIÁC & ĐIỀU KIỆN TỪNG ẢI
+   ========================================================================== */
+function checkTriangleGeometry() {
+  const angleA = getAngleDeg(points.B, points.A, points.C);
+  const angleB = getAngleDeg(points.A, points.B, points.C);
+  const angleC = getAngleDeg(points.A, points.C, points.B);
+
+  const lenAB = dist(points.A, points.B);
+  const lenAC = dist(points.A, points.C);
+  const lenBC = dist(points.B, points.C);
+
+  // Quy đổi cm (40px = 1cm)
+  const cmAB = (lenAB / 40).toFixed(1);
+  const cmAC = (lenAC / 40).toFixed(1);
+  const cmBC = (lenBC / 40).toFixed(1);
+
+  // Nhận diện tính chất với dung sai hợp lý cho màn hình cảm ứng
+  const isRightA = Math.abs(angleA - 90) <= 5.0;
+  const isObtuseA = angleA >= 105; // Góc tù rõ nét
+  const isIsoA = Math.abs(lenAB - lenAC) <= 14; // Cân tại A
+  const isEquilateral = Math.abs(lenAB - lenBC) <= 18 && Math.abs(lenAC - lenBC) <= 18 && Math.abs(lenAB - lenAC) <= 18; // Đều
+
+  // Cập nhật số đo lên HUD
+  const elAngleA = document.getElementById('hud-angle-A');
+  const elAngleB = document.getElementById('hud-angle-B');
+  const elAngleC = document.getElementById('hud-angle-C');
+  const elSideAB = document.getElementById('hud-side-AB');
+  const elSideAC = document.getElementById('hud-side-AC');
+  const elSideBC = document.getElementById('hud-side-BC');
+
+  elAngleA.innerText = `Góc A: ${Math.round(angleA)}°` + (isRightA ? ' (Vuông)' : isObtuseA ? ' (Tù)' : '');
+  elAngleA.className = 'hud-item ' + (isRightA || isObtuseA ? 'match' : '');
+
+  elAngleB.innerText = `Góc B: ${Math.round(angleB)}°`;
+  elAngleC.innerText = `Góc C: ${Math.round(angleC)}°`;
+
+  elSideAB.innerText = `AB: ${cmAB} cm`;
+  elSideAC.innerText = `AC: ${cmAC} cm`;
+  elSideBC.innerText = `BC: ${cmBC} cm`;
+
+  elSideAB.className = 'hud-item ' + (isIsoA ? 'match' : '');
+  elSideAC.className = 'hud-item ' + (isIsoA ? 'match' : '');
+
+  // Kiểm tra điều kiện hoàn thành ải hiện tại
+  let matchCurrent = false;
+  if (currentQuest === 0) {
+    matchCurrent = isRightA; // Ải 1: Tam giác Vuông
+  } else if (currentQuest === 1) {
+    matchCurrent = isObtuseA; // Ải 2: Tam giác Tù
+  } else if (currentQuest === 2) {
+    matchCurrent = isIsoA && !isRightA; // Ải 3: Tam giác Cân
+  } else if (currentQuest === 3) {
+    matchCurrent = isRightA && isIsoA; // Ải 4: Tam giác Vuông Cân
+  } else if (currentQuest === 4) {
+    matchCurrent = isEquilateral; // Ải 5: Tam giác Đều
+  }
+
+  return { angleA, angleB, angleC, lenAB, lenAC, lenBC, isRightA, isIsoA, isEquilateral, matchCurrent };
+}
+
+function showKnowledgeCard(info) {
+  const card = document.getElementById('knowledge-card');
+  const title = document.getElementById('card-title');
+  const propsList = document.getElementById('card-props');
+
+  title.innerText = info.knowledge.title;
+  propsList.innerHTML = info.knowledge.props.map(p => `<li>${p}</li>`).join('');
+  card.classList.add('active');
+}
+
+function hideKnowledgeCard() {
+  document.getElementById('knowledge-card').classList.remove('active');
+}
+
+function triggerQuestSuccess() {
+  if (questCleared) return;
+  questCleared = true;
+  soundSuccess();
+
+  const currentQInfo = QUESTS[currentQuest];
+  showKnowledgeCard(currentQInfo);
+
+  document.getElementById(`step-${currentQuest}`).classList.add('done');
+  document.getElementById(`step-${currentQuest}`).classList.remove('active');
+
+  spawnConfetti(canvas.width / (2 * (window.devicePixelRatio || 1)), 160, 45);
+
+  setTimeout(() => {
+    if (currentQuest < 4) {
+      currentQuest++;
+      questCleared = false;
+      document.getElementById(`step-${currentQuest}`).classList.add('active');
+      updateInstructionUI();
+      hideKnowledgeCard();
+    } else {
+      finishGame();
+    }
+  }, 2200); // Cho học sinh 2.2 giây để đọc thẻ kiến thức trước khi sang ải sau
+}
+
+function updateInstructionUI() {
+  const info = QUESTS[currentQuest];
+  const el = document.getElementById('instruction-text');
+  el.innerHTML = `<span class="instruction-badge">${info.badge}</span><span>${info.desc}</span>`;
+}
+
+function finishGame() {
+  soundVictory();
+  spawnConfetti(canvas.width / (2 * (window.devicePixelRatio || 1)), 200, 150);
+
+  const randomCode = Math.floor(100000 + Math.random() * 900000);
+  document.getElementById('cert-code').innerText = randomCode;
+
+  const now = new Date();
+  const timeStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} - ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  document.getElementById('cert-time').innerText = `Xác nhận lúc: ${timeStr}`;
+
+  submitScoreSCORM(10);
+  document.getElementById('victory-modal').classList.add('show');
+}
+
+/* ==========================================================================
+   5. RENDER CANVAS
+   ========================================================================== */
+function draw() {
+  const w = canvas.width / (window.devicePixelRatio || 1);
+  const h = canvas.height / (window.devicePixelRatio || 1);
+  ctx.clearRect(0, 0, w, h);
+
+  if (showGrid) {
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    const step = 30;
+    for (let x = 0; x < w; x += step) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (let y = 0; y < h; y += step) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+  }
+
+  const status = checkTriangleGeometry();
+
+  if (status.matchCurrent && !questCleared) {
+    questHoldTimer += 0.016;
+    if (questHoldTimer >= 0.28) {
+      triggerQuestSuccess();
+      questHoldTimer = 0;
+    }
+  } else {
+    questHoldTimer = 0;
+  }
+
+  // Tô nền tam giác
+  ctx.beginPath();
+  ctx.moveTo(points.A.x, points.A.y);
+  ctx.lineTo(points.B.x, points.B.y);
+  ctx.lineTo(points.C.x, points.C.y);
+  ctx.closePath();
+
+  ctx.fillStyle = status.matchCurrent ? 'rgba(22, 163, 74, 0.16)' : 'rgba(2, 132, 199, 0.08)';
+  ctx.fill();
+
+  // Vẽ 3 cạnh
+  drawEdge(points.A, points.B, status.isIsoA || status.isEquilateral);
+  drawEdge(points.A, points.C, status.isIsoA || status.isEquilateral);
+  drawEdge(points.B, points.C, status.isEquilateral);
+
+  // Ký hiệu góc vuông tại A
+  if (status.isRightA) {
+    drawRightAngleMarker(points.B, points.A, points.C);
+  }
+
+  // Ký hiệu cạnh bằng nhau (vạch đôi)
+  if (status.isIsoA || status.isEquilateral) {
+    drawTickMark(points.A, points.B);
+    drawTickMark(points.A, points.C);
+  }
+  if (status.isEquilateral) {
+    drawTickMark(points.B, points.C);
+  }
+
+  // Vẽ 3 đỉnh kéo
+  drawHandlePoint(points.A);
+  drawHandlePoint(points.B);
+  drawHandlePoint(points.C);
+
+  requestAnimationFrame(draw);
+}
+
+function drawEdge(p1, p2, isHighlighted) {
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.strokeStyle = isHighlighted ? '#16a34a' : '#0284c7';
+  ctx.lineWidth = isHighlighted ? 4.5 : 3;
+  ctx.stroke();
+}
+
+function drawHandlePoint(p) {
+  const isHovered = activePoint === p;
+
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, isHovered ? 20 : 13, 0, Math.PI * 2);
+  ctx.fillStyle = isHovered ? 'rgba(234, 88, 12, 0.25)' : 'rgba(2, 132, 199, 0.15)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, isHovered ? 9 : 7, 0, Math.PI * 2);
+  ctx.fillStyle = isHovered ? '#ea580c' : '#0284c7';
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 15px -apple-system, sans-serif';
+  let offsetX = p.x < 300 ? -20 : 12;
+  let offsetY = p.y < 200 ? -12 : 22;
+  ctx.fillText(p.label, p.x + offsetX, p.y + offsetY);
+}
+
+function drawRightAngleMarker(p1, corner, p2) {
+  const size = 16;
+  const v1 = vector(corner, p1);
+  const v2 = vector(corner, p2);
+  const l1 = Math.hypot(v1.x, v1.y);
+  const l2 = Math.hypot(v2.x, v2.y);
+  if (l1 < 5 || l2 < 5) return;
+
+  const u1 = { x: (v1.x / l1) * size, y: (v1.y / l1) * size };
+  const u2 = { x: (v2.x / l2) * size, y: (v2.y / l2) * size };
+
+  ctx.beginPath();
+  ctx.moveTo(corner.x + u1.x, corner.y + u1.y);
+  ctx.lineTo(corner.x + u1.x + u2.x, corner.y + u1.y + u2.y);
+  ctx.lineTo(corner.x + u2.x, corner.y + u2.y);
+  ctx.strokeStyle = '#16a34a';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawTickMark(p1, p2) {
+  const midX = (p1.x + p2.x) / 2;
+  const midY = (p1.y + p2.y) / 2;
+  const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+  const perp = angle + Math.PI / 2;
+
+  ctx.save();
+  ctx.translate(midX, midY);
+  ctx.strokeStyle = '#16a34a';
+  ctx.lineWidth = 2;
+
+  // 2 vạch song song
+  [-3, 3].forEach(offset => {
+    const ox = Math.cos(angle) * offset;
+    const oy = Math.sin(angle) * offset;
+    ctx.beginPath();
+    ctx.moveTo(ox - Math.cos(perp) * 6, oy - Math.sin(perp) * 6);
+    ctx.lineTo(ox + Math.cos(perp) * 6, oy + Math.sin(perp) * 6);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/* ==========================================================================
+   6. BẮT ĐIỂM CHẠM VÀ HÚT DÍNH TỪ TÍNH (SNAP)
+   ========================================================================== */
+function getCanvasPointerPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top
+  };
+}
+
+function onPointerDown(e) {
+  getAudioContext();
+  const pos = getCanvasPointerPos(e);
+  const hitRadius = 36;
+
+  const pointList = [points.A, points.B, points.C];
+  for (let p of pointList) {
+    if (Math.hypot(p.x - pos.x, p.y - pos.y) <= hitRadius) {
+      activePoint = p;
+      canvas.setPointerCapture(e.pointerId);
+      break;
+    }
+  }
+}
+
+function onPointerMove(e) {
+  if (!activePoint) return;
+  const pos = getCanvasPointerPos(e);
+  const w = canvas.width / (window.devicePixelRatio || 1);
+  const h = canvas.height / (window.devicePixelRatio || 1);
+
+  let targetX = Math.max(25, Math.min(w - 25, pos.x));
+  let targetY = Math.max(25, Math.min(h - 25, pos.y));
+
+  // Tự động hút dính lưới nhẹ khi kéo gần các giao điểm lưới (nếu bật lưới)
+  if (showGrid) {
+    if (Math.abs(targetX % 30) < 6) targetX = Math.round(targetX / 30) * 30;
+    if (Math.abs(targetY % 30) < 6) targetY = Math.round(targetY / 30) * 30;
+  }
+
+  activePoint.x = targetX;
+  activePoint.y = targetY;
+}
+
+function onPointerUp(e) {
+  if (activePoint) {
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    activePoint = null;
+  }
+}
+
+canvas.addEventListener('pointerdown', onPointerDown);
+canvas.addEventListener('pointermove', onPointerMove);
+canvas.addEventListener('pointerup', onPointerUp);
+canvas.addEventListener('pointercancel', onPointerUp);
+
+/* ==========================================================================
+   7. PHÁO HOA CHÚC MỪNG
+   ========================================================================== */
+const cCanvas = document.getElementById('confetti-canvas');
+const cCtx = cCanvas.getContext('2d');
+let particles = [];
+
+function resizeConfetti() {
+  const rect = container.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  cCanvas.width = rect.width * dpr;
+  cCanvas.height = rect.height * dpr;
+  cCtx.scale(dpr, dpr);
+}
+
+function spawnConfetti(originX, originY, count = 50) {
+  const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'];
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 8 + 3;
+    particles.push({
+      x: originX,
+      y: originY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 2,
+      size: Math.random() * 6 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+      rotation: Math.random() * 360,
+      rSpeed: Math.random() * 8 - 4
+    });
+  }
+}
+
+function updateConfetti() {
+  const w = cCanvas.width / (window.devicePixelRatio || 1);
+  const h = cCanvas.height / (window.devicePixelRatio || 1);
+  cCtx.clearRect(0, 0, w, h);
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.22;
+    p.alpha -= 0.015;
+    p.rotation += p.rSpeed;
+
+    if (p.alpha <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    cCtx.save();
+    cCtx.globalAlpha = p.alpha;
+    cCtx.translate(p.x, p.y);
+    cCtx.rotate((p.rotation * Math.PI) / 180);
+    cCtx.fillStyle = p.color;
+    cCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+    cCtx.restore();
+  }
+
+  requestAnimationFrame(updateConfetti);
+}
+
+/* ==========================================================================
+   8. ĐIỀU KHIỂN & VỊ TRÍ GỢI Ý CHO TỪNG ẢI
+   ========================================================================== */
+function toggleGrid() {
+  showGrid = !showGrid;
+  const btn = document.getElementById('btn-grid');
+  if (showGrid) btn.classList.add('active');
+  else btn.classList.remove('active');
+}
+
+function resetCurrentQuest() {
+  questCleared = false;
+  questHoldTimer = 0;
+  hideKnowledgeCard();
+
+  // Đặt vị trí gần đúng giúp học sinh chỉ cần kéo nhẹ là nhận diện được
+  if (currentQuest === 0) {
+    // Ải 1: Tam giác nhọn ban đầu -> kéo A vuông
+    points.A = { x: 260, y: 130, label: 'A' };
+    points.B = { x: 180, y: 320, label: 'B' };
+    points.C = { x: 440, y: 320, label: 'C' };
+  } else if (currentQuest === 1) {
+    // Ải 2: Kéo góc A tù
+    points.A = { x: 300, y: 220, label: 'A' };
+    points.B = { x: 150, y: 320, label: 'B' };
+    points.C = { x: 450, y: 320, label: 'C' };
+  } else if (currentQuest === 2) {
+    // Ải 3: Tam giác cân tại A (đỉnh A gần trục đối xứng giữa B và C)
+    points.A = { x: 315, y: 120, label: 'A' };
+    points.B = { x: 160, y: 320, label: 'B' };
+    points.C = { x: 440, y: 320, label: 'C' };
+  } else if (currentQuest === 3) {
+    // Ải 4: Tam giác vuông cân
+    points.A = { x: 300, y: 170, label: 'A' };
+    points.B = { x: 160, y: 310, label: 'B' };
+    points.C = { x: 440, y: 310, label: 'C' };
+  } else if (currentQuest === 4) {
+    // Ải 5: Tam giác đều (độ cao h = cạnh * √3 / 2)
+    points.A = { x: 300, y: 100, label: 'A' };
+    points.B = { x: 170, y: 325, label: 'B' };
+    points.C = { x: 430, y: 325, label: 'C' };
+  }
+}
+
+function restartEntireGame() {
+  document.getElementById('victory-modal').classList.remove('show');
+  for (let i = 0; i < 5; i++) {
+    const el = document.getElementById(`step-${i}`);
+    el.classList.remove('active', 'done');
+  }
+  document.getElementById('step-0').classList.add('active');
+  currentQuest = 0;
+  questCleared = false;
+  resetCurrentQuest();
+  updateInstructionUI();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  resizeCanvas();
+  resizeConfetti();
+  resetCurrentQuest();
+  updateInstructionUI();
+  draw();
+  updateConfetti();
+});
+</script>
+</body>
+</html>
